@@ -110,4 +110,4 @@ script:
   # run parcel unit tests using Debug mode of libcloudphxx
   - cd parcel
   - py.test -v unit_test/
-  - py.test -v long_test/
+  - py.test -s -v long_test/
