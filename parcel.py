@@ -3,10 +3,9 @@
 import sys
 
 from argparse import ArgumentParser, RawTextHelpFormatter
-
-from distutils.version import StrictVersion
+from packaging.version import Version
 from scipy import __version__ as scipy_version
-assert StrictVersion(scipy_version) >= StrictVersion("0.12"), "see https://github.com/scipy/scipy/pull/491"
+assert Version(scipy_version) >= Version("0.12"), "see https://github.com/scipy/scipy/pull/491"
 
 from scipy.io import netcdf
 import json, inspect, numpy as np
