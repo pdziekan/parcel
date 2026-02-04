@@ -18,7 +18,7 @@ from libcloudphxx import git_revision as libcloud_version
 parcel_version = subprocess.check_output(["git", "rev-parse", "HEAD"]).rstrip()
 
 # import refactored modules
-from parcel_common import _Chem_g_id, _Chem_a_id, lognormal, sum_of_lognormals, _stats, _p_hydro_const_rho, _p_hydro_const_th_rv, _arguments_checking, _init_sanity_check
+from parcel_common import _Chem_g_id, _Chem_a_id, lognormal, sum_of_lognormals, _stats, _p_hydro_const_rho, _p_hydro_const_th_rv, _arguments_checking, _init_sanity_check, _w_eval
 from micro_lgrngn import _micro_init as _micro_init_lgrngn, _micro_step as _micro_step_lgrngn
 from micro_blk_1m import _opts_init_blk_1m, _micro_step_blk_1m
 from micro_blk_1m_ice import _opts_init_blk_1m_ice, _micro_step_blk_1m_ice
@@ -44,13 +44,19 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
   wait = 0,
   large_tail = False,
   rng_seed = None,
-  rd_insol  = 0.
+  rd_insol  = 0.,
+  t = None
 ):
   """
   Args:
     dt      (Optional[float]):    timestep [s]
     z_max   (Optional[float]):    maximum vertical displacement [m]
-    w       (Optional[float]):    updraft velocity [m/s]
+    t       (Optional[float|None]): simulation duration [s].
+                                  Exactly one of `z_max` or `t` must be specified.
+    w       (Optional[float|callable|str]): updraft velocity [m/s]
+                                  - constant: number
+                                  - time-dependent: callable w(t) or expression string in `t` (seconds)
+                                    e.g. "1 + 0.5*np.sin(2*np.pi*t/60)"
     T_0     (Optional[float]):    initial temperature [K]
     p_0     (Optional[float]):    initial pressure [Pa]
     r_0     (Optional[float]):    initial water vapour mass mixing ratio [kg/kg]
@@ -122,6 +128,17 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
   for k in args:
     opts[k] = locals()[k]
 
+  # Enforce stop condition selection: either z_max or t (but not both).
+  # Backwards compatible default is z_max (t=None).
+  # if opts["t"] is not None and opts["z_max"] is not None:
+  #   raise ValueError("Specify only one stop condition: either z_max or t (not both)")
+  # if opts["t"] is None and opts["z_max"] is None:
+  #   raise ValueError("You must specify exactly one stop condition: z_max or t")
+  # if opts["t"] is not None and opts["t"] <= 0:
+  #   raise ValueError("t must be > 0")
+  # if opts["z_max"] is not None and opts["z_max"] <= 0:
+  #   raise ValueError("z_max must be > 0")
+
   # parsing json specification of output spectra
   spectra = json.loads(opts["out_bin"])
 
@@ -140,7 +157,22 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
   _arguments_checking(opts, spectra, aerosol, ice_switch)
 
   th_0 = T_0 * (common.p_1000 / p_0)**(common.R_d / common.c_pd)
-  nt = int(z_max / (w * dt))
+
+  # Stopping condition differs for constant vs. time-dependent w.
+  # For constant w: keep original behaviour (nt computed from stop condition).
+  # For variable w: integrate until the stop condition is met.
+  # w0 = _w_eval(w, 0.0)
+  # if w0 <= 0 and isinstance(w, (int, float, np.floating)) and opts["z_max"] is not None:
+  #   raise ValueError("For constant w with z_max stop, expected w>0 to reach z_max")
+
+  # if isinstance(w, (int, float, np.floating)):
+  #   if opts["t"] is not None:
+  #     nt = int(np.ceil(float(opts["t"]) / dt))
+  #   else:
+  #     nt = int(opts["z_max"] / (float(w) * dt))
+  # else:
+  #   nt = None
+
   state = {
     "t" : 0, "z" : 0,
     "r_v" : np.array([r_0]), "p" : p_0,
@@ -198,12 +230,35 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
           _output_save(fout, state, 0)  # simpler output for blk_1m
 
       # timestepping
-      for it in range(1, nt+1):
+      rec = 0
+      it = 0
+      max_steps_guard = 5_000_000  # safety for pathological w(t)
+      while True:
+        # if nt is not None:
+        #   if it >= nt:
+        #     break
+        # else:
+        # variable-w stopping conditions
+        if opts["t"] is not None:
+          if state["t"] >= opts["t"]:
+            break
+        else:
+          if state["z"] >= opts["z_max"]:
+            break
+
+        if it >= max_steps_guard:
+          raise RuntimeError("Exceeded safety step limit while integrating variable w(t)")
+
+        it += 1
+
+        # vertical velocity at current (start-of-step) time
+        w_it = _w_eval(w, state["t"])
+
         # diagnostics
         # the reasons to use analytic solution:
         # - independent of dt
         # - same as in 2D kinematic model
-        state["z"] += w * dt
+        state["z"] += w_it * dt
         state["t"] = it * dt
 
         # pressure
@@ -218,7 +273,7 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
         elif pprof == "pprof_piecewise_const_rhod":
           # as in Grabowski and Wang 2009 but calculating pressure
           # for rho piecewise constant per each time step
-          state["p"] = _p_hydro_const_rho(w*dt, state["p"], state["rhod"][0])
+          state["p"] = _p_hydro_const_rho(w_it*dt, state["p"], state["rhod"][0])
 
         else: raise Exception("pprof should be pprof_const_th_rv, pprof_const_rhod, or pprof_piecewise_const_rhod")
 
@@ -251,7 +306,13 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
 
         # output
         if (it % outfreq == 0):
-          print(str(round(it / (nt * 1.) * 100, 2)) + " %")
+          # if nt is not None and nt > 0:
+          #   print(str(round(it / (nt * 1.) * 100, 2)) + " %")
+          if opts["t"] is not None:
+            print(str(round(state["t"] / (opts["t"] * 1.) * 100, 2)) + " %")
+          if opts["z_max"] is not None:
+            print(str(round(state["z"], 1)) + " / " + str(opts["z_max"]) + " m")
+          
           rec = it/outfreq
           if scheme == "lgrngn":
             _output(fout, opts, micro, state, rec, spectra)
@@ -262,7 +323,7 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
       _save_attrs(fout, opts)
 
       if wait != 0:
-        for it in range (nt+1, nt+wait):
+        for it in range (it+1, it+wait):
           state["t"] = it * dt
           if scheme == "lgrngn":
             _micro_step_lgrngn(micro, state, info, opts)
