@@ -53,6 +53,8 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
   sstp_cond_act = None,
   sstp_cond_mix = None,
   exact_sstp_cond = None,
+  aerosol_independent_of_rhod = None
+  ,backend = "serial"
 ):
   """
   Args:
@@ -69,6 +71,7 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
     r_0     (Optional[float]):    initial water vapour mass mixing ratio [kg/kg]
     RH_0    (Optional[float]):    initial relative humidity
     scheme  (Optional[string]):   microphysics scheme to use: 'lgrngn', 'blk_1m'
+    backend (Optional[str]):      lgrngn backend to use: 'serial', 'openmp', 'cuda' (only used when scheme='lgrngn')
     ice_switch (Optional[bool]):  enable ice microphysics
     ice_nucl (Optional[bool]):    enable ice nucleation in lagrangian scheme
     time_dep_ice_nucl (Optional[bool]): enable time-dependent ice nucleation in lagrangian scheme
@@ -140,6 +143,7 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
     chem_dsc (Optional[bool]):    on/off for dissociation of chem species in droplets
     chem_rct (Optional[bool]):    on/off for oxidation of S_IV to S_VI
     chem_rho (Optional[float]):   aerosol/droplet material density for chemistry [kg/m3]
+    aerosol_independent_of_rhod (Optional[bool]): on/off for initial aerosol concentration independent of rhod (assumed at STP otherwise)
 
     # Coalescence Substepping controls
     sstp_chem (Optional[int]):    substeps per timestep for chemistry (>=1)

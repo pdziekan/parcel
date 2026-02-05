@@ -91,6 +91,20 @@ def _output_init(micro, opts, spectra):
     fout.createVariable("ice_mix_ratio", 'd', ('t',))
     fout.variables["ice_mix_ratio"].unit = "kg/kg"
 
+  # if micro.opts_init.exact_sstp_cond:
+  fout.createVariable("sstp_cond_mean", 'd', ('t',))
+  fout.variables["sstp_cond_mean"].unit = "1"
+
+  fout.createVariable("act_m0", 'd', ('t',))
+  fout.variables["act_m0"].unit = "1/kg"
+
+  fout.createVariable("sd_conc", 'd', ('t',))
+  fout.variables["sd_conc"].unit = "1"
+
+  # wall-clock time spent inside step_cond (per parcel output timestep)
+  fout.createVariable("step_cond_walltime_ms", 'd', ('t',))
+  fout.variables["step_cond_walltime_ms"].unit = "ms"
+
   return fout
 
 

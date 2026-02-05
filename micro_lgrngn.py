@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
+import time
 from libcloudphxx import lgrngn
 from parcel_common import lognormal, sum_of_lognormals, _Chem_g_id, _Chem_a_id, _stats
 
@@ -22,6 +23,7 @@ def _micro_init(aerosol, opts, state):
     "sstp_cond_act",
     "sstp_cond_mix",
     "exact_sstp_cond",
+    "aerosol_independent_of_rhod"
   ]:
     if opt in opts and opts[opt] is not None:
       setattr(opts_init, opt, opts[opt])
@@ -94,7 +96,22 @@ def _micro_init(aerosol, opts, state):
     opts_init.sstp_chem = opts["sstp_chem"]
 
   # initialisation
-  micro = lgrngn.factory(lgrngn.backend_t.serial, opts_init)
+  backend_str = opts.get("backend", "serial")
+  if backend_str is None:
+    backend_str = "serial"
+  backend_str = str(backend_str).lower()
+
+  backend_map = {
+    "serial": lgrngn.backend_t.serial,
+    "openmp": lgrngn.backend_t.OpenMP,
+    "omp": lgrngn.backend_t.OpenMP,
+    "cuda": lgrngn.backend_t.CUDA,
+    "gpu": lgrngn.backend_t.CUDA,
+  }
+  if backend_str not in backend_map:
+    raise ValueError(f"Unknown lgrngn backend: {backend_str!r} (expected one of: {', '.join(sorted(backend_map))})")
+
+  micro = lgrngn.factory(backend_map[backend_str], opts_init)
   ambient_chem = {}
   if micro.opts_init.chem_switch:
     ambient_chem = dict((v, state[k]) for k,v in _Chem_g_id.items())
@@ -125,7 +142,13 @@ def _micro_step(micro, state, info, opts):
     ambient_chem = dict((v, state[k]) for k,v in _Chem_g_id.items())
 
   # call libcloudphxx microphysics
-  micro.step_sync(libopts, state["th_d"], state["r_v"], state["rhod"], ambient_chem=ambient_chem)
+  # micro.step_sync(libopts, state["th_d"], state["r_v"], state["rhod"], ambient_chem=ambient_chem)
+  micro.sync_in(state["th_d"], state["r_v"], state["rhod"], ambient_chem=ambient_chem)
+
+  t0 = time.perf_counter()
+  micro.step_cond(libopts, state["th_d"], state["r_v"], ambient_chem=ambient_chem)
+  state["step_cond_walltime_ms"] = (time.perf_counter() - t0) * 1e3
+
   micro.step_async(libopts)
 
   # update state after microphysics (needed for below update for chemistry)
@@ -142,3 +165,23 @@ def _micro_step(micro, state, info, opts):
     micro.diag_ice()
     micro.diag_ice_mix_ratio()
     state["ice_mix_ratio"] = np.frombuffer(micro.outbuf())[0]
+  # if micro.opts_init.exact_sstp_cond:
+  try: # depending on options, sstp_cond_avg may not be available
+    micro.diag_all()
+    mom1 = micro.diag_sstp_cond_mom(1)
+    mom1 = np.frombuffer(micro.outbuf())[0]
+    mom0 = micro.diag_sstp_cond_mom(0)
+    mom0 = np.frombuffer(micro.outbuf())[0]
+    state["sstp_cond_mean"] = mom1/mom0
+    print("sstp_cond_mean: ", state["sstp_cond_mean"])
+  except Exception:
+    state["sstp_cond_mean"] = np.full_like(state["th_d"], np.nan)
+
+  micro.diag_rw_ge_rc()
+  mom0 = micro.diag_wet_mom(0)
+  mom0 = np.frombuffer(micro.outbuf())[0]
+  state["act_m0"] = mom0
+
+  micro.diag_all()
+  micro.diag_sd_conc()
+  state["sd_conc"] = np.frombuffer(micro.outbuf())[0]
