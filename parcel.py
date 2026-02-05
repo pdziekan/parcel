@@ -133,6 +133,14 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
     chem_dsl (Optional[bool]):    on/off for dissolving chem species into droplets
     chem_dsc (Optional[bool]):    on/off for dissociation of chem species in droplets
     chem_rct (Optional[bool]):    on/off for oxidation of S_IV to S_VI
+    chem_rho (Optional[float]):   aerosol/droplet material density for chemistry [kg/m3]
+
+    # Substepping controls
+    sstp_cond (Optional[int]):    substeps per dynamical timestep for condensation/evaporation (>=1)
+    sstp_chem (Optional[int]):    substeps per timestep for chemistry (>=1)
+
+    # Misc
+    rd_insol (Optional[float]):   insoluble dry radius offset/addition used by selected microphysics (if applicable) [m]
 
    """
   # packing function arguments into "opts" dictionary
