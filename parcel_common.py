@@ -104,38 +104,39 @@ def _arguments_checking(opts, spectra, aerosol, ice_switch):
   if w0 <= 0 and isinstance(opts["w"], (int, float, np.floating)) and opts["z_max"] is not None:
     raise ValueError("For constant w with z_max stop, expected w>0 to reach z_max")
 
-  for name, dct in aerosol.items():
-    # TODO: check if name is valid netCDF identifier
-    # (http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/CDM/Identifiers.html)
-    keys = ["kappa", "mean_r", "n_tot", "gstdev"]
-    for key in keys:
-      if key not in dct:
-        raise Exception(">>" + key + "<< is missing in aerosol[" + name + "]")
-    for key in dct:
-      if key not in keys:
-        raise Exception("invalid key >>" + key + "<< in aerosol[" + name + "]")
-    if dct["kappa"] <= 0:
-      raise Exception("kappa hygroscopicity parameter should be larger than 0 for aerosol[" + name + "]")
-    if type(dct["mean_r"]) != list:
-        raise Exception(">>mean_r<< key in aerosol["+ name +"] must be a list")
-    if type(dct["gstdev"]) != list:
-        raise Exception(">>gstdev<< key in aerosol["+ name +"] must be a list")
-    if type(dct["n_tot"]) != list:
-        raise Exception(">>n_tot<< key in aerosol["+ name +"] must be a list")
-    if not len(dct["mean_r"]) == len(dct["n_tot"]) == len(dct["gstdev"]):
-      raise Exception("mean_r, n_tot and gstdev lists should have same sizes for aerosol[" + name + "]")
-    for mean_r in dct["mean_r"]:
-      if mean_r <= 0:
-        raise Exception("mean radius should be > 0 for aerosol[" + name + "]")
-    for n_tot in dct["n_tot"]:
-      if n_tot <= 0:
-        raise Exception("concentration should be > 0 for aerosol[" + name + "]")
-    for gstdev in dct["gstdev"]:
-      if gstdev <= 0:
-        raise Exception("standard deviation should be > 0 for aerosol[" + name + "]")
-    # necessary?
-      if gstdev == 1.:
-        raise Exception("standard deviation should be != 1 to avoid monodisperse distribution for aerosol[" + name + "]")
+  if aerosol is not None:
+    for name, dct in aerosol.items():
+      # TODO: check if name is valid netCDF identifier
+      # (http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/CDM/Identifiers.html)
+      keys = ["kappa", "mean_r", "n_tot", "gstdev"]
+      for key in keys:
+        if key not in dct:
+          raise Exception(">>" + key + "<< is missing in aerosol[" + name + "]")
+      for key in dct:
+        if key not in keys:
+          raise Exception("invalid key >>" + key + "<< in aerosol[" + name + "]")
+      if dct["kappa"] <= 0:
+        raise Exception("kappa hygroscopicity parameter should be larger than 0 for aerosol[" + name + "]")
+      if type(dct["mean_r"]) != list:
+          raise Exception(">>mean_r<< key in aerosol["+ name +"] must be a list")
+      if type(dct["gstdev"]) != list:
+          raise Exception(">>gstdev<< key in aerosol["+ name +"] must be a list")
+      if type(dct["n_tot"]) != list:
+          raise Exception(">>n_tot<< key in aerosol["+ name +"] must be a list")
+      if not len(dct["mean_r"]) == len(dct["n_tot"]) == len(dct["gstdev"]):
+        raise Exception("mean_r, n_tot and gstdev lists should have same sizes for aerosol[" + name + "]")
+      for mean_r in dct["mean_r"]:
+        if mean_r <= 0:
+          raise Exception("mean radius should be > 0 for aerosol[" + name + "]")
+      for n_tot in dct["n_tot"]:
+        if n_tot <= 0:
+          raise Exception("concentration should be > 0 for aerosol[" + name + "]")
+      for gstdev in dct["gstdev"]:
+        if gstdev <= 0:
+          raise Exception("standard deviation should be > 0 for aerosol[" + name + "]")
+      # necessary?
+        if gstdev == 1.:
+          raise Exception("standard deviation should be != 1 to avoid monodisperse distribution for aerosol[" + name + "]")
 
   for name, dct in spectra.items():
     # TODO: check if name is valid netCDF identifier

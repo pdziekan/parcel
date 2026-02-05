@@ -35,6 +35,7 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
   time_dep_ice_nucl = False,
   sd_conc = 64,
   aerosol = '{"ammonium_sulfate": {"kappa": 0.61, "mean_r": [0.02e-6], "gstdev": [1.4], "n_tot": [60.0e6]}}',
+  dry_sizes = None,
   out_bin = '{"radii": {"rght": 0.01, "moms": [0], "drwt": "wet", "nbin": 1, "lnli": "log", "left": 1e-15}}',
   SO2_g = 0., O3_g = 0., H2O2_g = 0., CO2_g = 0., HNO3_g = 0., NH3_g = 0.,
   chem_dsl = False, chem_dsc = False, chem_rct = False,
@@ -74,6 +75,7 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
                                   (added for testing)
     sd_conc (Optional[int]):      number of moving bins (super-droplets)
 
+    
     aerosol (Optional[json str]): dict of dicts defining aerosol distribution, e.g.:
 
                                   {"ammonium_sulfate": {"kappa": 0.61, "mean_r": [0.02e-6, 0.07e-7], "gstdev": [1.4, 1.2], "n_tot": [120.0e6, 80.0e6]}
@@ -84,6 +86,20 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
                                         gstdev - lognormal distribution geometric standard deviation       (list if multimodal distribution)
                                         n_tot  - lognormal distribution total concentration under standard
                                                  conditions (T=20C, p=1013.25 hPa, rv=0) [m^-3]            (list if multimodal distribution)
+                                                 
+    dry_sizes (Optional[json str|dict|None]): discrete aerosol bins used to set libcloudphxx `opts_init.dry_sizes`.
+                                      Can be used together with `aerosol`/dry_distros.
+                                      Format example:
+                                      {
+                                        "ammonium_sulfate": {
+                                          "kappa": 0.61,
+                                          "bins": {
+                                            "1e-6":  [30.0, 15],
+                                            "15e-6": [10.0,  5]
+                                          }
+                                        }
+                                      }
+                                      where bins map dry_radius_m -> [STP_concentration_1_per_m3, number_of_SDs]
 
     large_tail (Optional[bool]) : use more SD to better represent the large tail of the initial aerosol distribution
 
@@ -118,9 +134,6 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
     chem_dsc (Optional[bool]):    on/off for dissociation of chem species in droplets
     chem_rct (Optional[bool]):    on/off for oxidation of S_IV to S_VI
 
-}
-
-
    """
   # packing function arguments into "opts" dictionary
   args, _, _, _ = inspect.getargvalues(inspect.currentframe())
@@ -142,8 +155,14 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
   # parsing json specification of output spectra
   spectra = json.loads(opts["out_bin"])
 
-  # parsing json specification of init aerosol spectra
-  aerosol = json.loads(opts["aerosol"])
+  # parsing json specification of init aerosol spectra (if provided)
+  aerosol = json.loads(opts["aerosol"]) if isinstance(opts.get("aerosol"), str) else opts.get("aerosol")
+
+  # allow passing dry_sizes as dict or json string
+  if opts.get("dry_sizes") is not None and isinstance(opts.get("dry_sizes"), str):
+    dry_sizes = json.loads(opts["dry_sizes"])
+  else:
+    dry_sizes = opts.get("dry_sizes")
 
   # default water content
   if ((opts["r_0"] < 0) and (opts["RH_0"] < 0)):
@@ -319,8 +338,9 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
           elif scheme == "blk_1m":
             _output_save(fout, state, rec)
 
-      _save_attrs(fout, info)
+      # _save_attrs(fout, info)
       _save_attrs(fout, opts)
+      print("post _save_attrs")
 
       if wait != 0:
         for it in range (it+1, it+wait):

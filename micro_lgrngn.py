@@ -18,14 +18,50 @@ def _micro_init(aerosol, opts, state):
   opts_init.th_dry = True
   opts_init.const_p = False
 
-  # read in the initial aerosol size distribution
-  dry_distros = {}
-  for name, dct in aerosol.items(): # loop over kappas
-    lognormals = []
-    for i in range(len(dct["mean_r"])):
-      lognormals.append(lognormal(dct["mean_r"][i], dct["gstdev"][i], dct["n_tot"][i]))
-    dry_distros[(dct["kappa"], opts["rd_insol"])] = sum_of_lognormals(lognormals)
-  opts_init.dry_distros = dry_distros
+  # --- aerosol initialization ---
+  # dry_distros from lognormal spec (opts['aerosol'])
+  if aerosol is not None and isinstance(aerosol, dict) and len(aerosol) > 0:
+    dry_distros = {}
+    for name, dct in aerosol.items():
+      lognormals = []
+      for i in range(len(dct["mean_r"])):
+        lognormals.append(lognormal(dct["mean_r"][i], dct["gstdev"][i], dct["n_tot"][i]))
+      dry_distros[(float(dct["kappa"]), float(opts["rd_insol"]))] = sum_of_lognormals(lognormals)
+    opts_init.dry_distros = dry_distros
+
+  # dry_sizes from discrete bins (opts['dry_sizes'])
+  ds = opts.get("dry_sizes")
+  if ds is not None:
+    print(opts.get("dry_sizes"))
+    if not isinstance(ds, dict) or len(ds) == 0:
+      raise ValueError("dry_sizes must be a non-empty dict when provided")
+
+    dry_sizes = {}
+    for name, dct in ds.items():
+      print(name, dct)
+      if "kappa" not in dct or "bins" not in dct:
+        raise ValueError("Each dry_sizes mode must define 'kappa' and 'bins'")
+      kappa = float(dct["kappa"])
+      bins = dct["bins"]
+      if not isinstance(bins, dict) or len(bins) == 0:
+        raise ValueError("dry_sizes 'bins' must be a non-empty dict of radius->[conc, n_sd]")
+
+      print(bins)
+      bins_parsed = {}
+      for rd_key, val in bins.items():
+        print(rd_key, val)
+        rd = float(rd_key)
+        if not (isinstance(val, (list, tuple)) and len(val) == 2):
+          raise ValueError("dry_sizes bins values must be [STP_concentration_1_per_m3, number_of_SDs]")
+        conc = float(val[0])
+        n_sd = int(val[1])
+        bins_parsed[rd] = [conc, n_sd]
+
+      print(bins_parsed)
+      dry_sizes[(kappa, float(opts["rd_insol"]))] = bins_parsed
+      print(dry_sizes)
+
+    opts_init.dry_sizes = dry_sizes
 
   # better resolution for the SD tail
   if opts["large_tail"]:
