@@ -46,7 +46,13 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
   large_tail = False,
   rng_seed = None,
   rd_insol  = 0.,
-  t = None
+  t = None,
+  adaptive_sstp_cond = None,
+  sstp_cond_adapt_drw2_eps = None,
+  sstp_cond_adapt_drw2_max = None,
+  sstp_cond_act = None,
+  sstp_cond_mix = None,
+  exact_sstp_cond = None,
 ):
   """
   Args:
@@ -135,9 +141,17 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
     chem_rct (Optional[bool]):    on/off for oxidation of S_IV to S_VI
     chem_rho (Optional[float]):   aerosol/droplet material density for chemistry [kg/m3]
 
-    # Substepping controls
-    sstp_cond (Optional[int]):    substeps per dynamical timestep for condensation/evaporation (>=1)
+    # Coalescence Substepping controls
     sstp_chem (Optional[int]):    substeps per timestep for chemistry (>=1)
+
+    # condensation substepping controls
+    sstp_cond (Optional[int]):    substeps per dynamical timestep for condensation/evaporation (>=1)
+    adaptive_sstp_cond (Optional[bool]):   on/off for adaptive substepping for condensation/evaporation
+    sstp_cond_adapt_drw2_eps (Optional[float]):   tolerance parameter for adaptive condensation/evaporation substepping
+    sstp_cond_adapt_drw2_max (Optional[float]):   maximum relative change of rw2 for adaptive condensation/evaporation substepping
+    sstp_cond_act (Optional[int]):    substeps for (de)activating droplets
+    sstp_cond_mix (Optional[bool]):   on/off mixing of thermodynamic variables between superdroplets after each condensation substep
+    exact_sstp_cond (Optional[bool]): on/off for per-particle condensation substepping (per-cell if off)
 
     # Misc
     rd_insol (Optional[float]):   insoluble dry radius offset/addition used by selected microphysics (if applicable) [m]

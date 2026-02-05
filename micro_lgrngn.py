@@ -9,8 +9,23 @@ def _micro_init(aerosol, opts, state):
 
   # lagrangian scheme options
   opts_init = lgrngn.opts_init_t()
-  for opt in ["dt", "sd_conc", "chem_rho", "sstp_cond","ice_switch","time_dep_ice_nucl"]:
-    setattr(opts_init, opt, opts[opt])
+  for opt in [
+    "dt", 
+    "sd_conc", 
+    "chem_rho", 
+    "sstp_cond",
+    "ice_switch",
+    "time_dep_ice_nucl",
+    "adaptive_sstp_cond",
+    "sstp_cond_adapt_drw2_eps",
+    "sstp_cond_adapt_drw2_max",
+    "sstp_cond_act",
+    "sstp_cond_mix",
+    "exact_sstp_cond",
+  ]:
+    if opt in opts and opts[opt] is not None:
+      setattr(opts_init, opt, opts[opt])
+
   opts_init.n_sd_max = opts_init.sd_conc
   if opts["rng_seed"] is not None:
       opts_init.rng_seed = int(opts["rng_seed"])
