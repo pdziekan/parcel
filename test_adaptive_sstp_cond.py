@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import List
 
 sstp_cond_max = 10
-z_max = 500.0
+z_max = 3000.0
 
 def run_scheme(w_max, adaptive, outfile, *, sstp_cond=sstp_cond_max):
     args = dict(
@@ -49,7 +49,11 @@ def run_scheme(w_max, adaptive, outfile, *, sstp_cond=sstp_cond_max):
         sstp_cond_mix   = False, # if adaptive else True,
         exact_sstp_cond = True, # if adaptive else False,       
         aerosol_independent_of_rhod=True, 
-        backend="OpenMP"
+        backend="OpenMP",
+        ice_switch = True,
+        ice_nucl = True,
+        time_dep_ice_nucl = False,
+        rd_insol = 0.5e-6
     )
 
     # NOTE: we allow passing these in through function attributes set outside.
