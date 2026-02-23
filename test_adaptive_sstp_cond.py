@@ -16,16 +16,16 @@ from pathlib import Path
 from typing import List
 
 sstp_cond_max = 10
-z_max = 3000.0
+z_max = 4000.0
 
 def run_scheme(w_max, adaptive, outfile, *, sstp_cond=sstp_cond_max):
     args = dict(
         p_0=100000,
         RH_0=0.9,
-        T_0=300,
+        T_0=260,
         aerosol = None,
         # aerosol = '{"pristine": {"kappa": 0.61, "mean_r": [0.011e-6, 0.06e-6], "gstdev": [1.2, 1.7], "n_tot": [125.0e6, 65.0e6]}}',      # aerosol=None,
-        sd_conc=pow(2,10),#1024,#256,
+        sd_conc=100,#pow(2,10),#1024,#256,
         # dry_sizes={"Bartman": {"kappa": 0.2, "bins": {
         #                                     str(r_dry):  [N_STP, 1]
         #                                   }}},
@@ -46,14 +46,14 @@ def run_scheme(w_max, adaptive, outfile, *, sstp_cond=sstp_cond_max):
         sstp_cond_adapt_drw2_eps=None,
         sstp_cond_adapt_drw2_max=None,
         sstp_cond_act=None,
-        sstp_cond_mix   = False, # if adaptive else True,
+        sstp_cond_mix   = False, #cant be True for adaptive
         exact_sstp_cond = True, # if adaptive else False,       
         aerosol_independent_of_rhod=True, 
         backend="OpenMP",
         ice_switch = True,
         ice_nucl = True,
-        time_dep_ice_nucl = False,
-        rd_insol = 0.5e-6
+        time_dep_ice_nucl = True,
+        rd_insol = 0.1e-6
     )
 
     # NOTE: we allow passing these in through function attributes set outside.
@@ -100,7 +100,8 @@ vary_eps = [1e-1, 1e-2, 1e-3]
 def make_figure(aerosol_name, aerosol, xmax):
     run_scheme.aerosol = aerosol
     # rows: w_max; cols: eps
-    w_max_list = [0.1, 1., 2.5, 5.0]
+    # w_max_list = [0.1, 1., 2.5, 5.0]
+    w_max_list = [5.0]
     fig, axes = plt.subplots(len(w_max_list), len(vary_eps), figsize=(15.0, 15.0), sharex=True, sharey=True, squeeze=False)
 
     generated_nc_files: List[str] = []
@@ -143,7 +144,7 @@ def make_figure(aerosol_name, aerosol, xmax):
             ax.text(
                 0.98,
                 0.05,
-                f"sstp_cond_avg={sstp_cond_avg:.2f}\nspeedup={speedup:.2f}x",
+                f"sstp_cond_avg={sstp_cond_avg:.2f}\nref={ref_step_cond_mean_ms:.2f} ms\nspeedup={speedup:.2f}x",
                 transform=ax.transAxes,
                 ha="right",
                 va="bottom",

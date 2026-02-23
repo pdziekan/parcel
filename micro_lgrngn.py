@@ -124,6 +124,7 @@ def _micro_step(micro, state, info, opts):
   '''Microphysics step for lagrangian scheme'''
   libopts = lgrngn.opts_t()
   libopts.cond = True
+  libopts.depo = True
   libopts.coal = False
   libopts.adve = False
   libopts.sedi = False
