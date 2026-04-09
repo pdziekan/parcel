@@ -42,13 +42,13 @@ def test_plot_ice_SD():
             RH_0 = 1.,
             scheme = "lgrngn",
             ice_switch=True,
+            depo = True,
             ice_nucl=True,
             time_dep_ice_nucl=True,
-            aerosol = '{"ammonium_sulfate": {"kappa": 0.61, "mean_r": [0.02e-6], "gstdev": [1.4], "n_tot": [60.0e6]}}', 
+            aerosol = f'{{"ammonium_sulfate": {{"kappa": 0.61, "rd_insol": {rd_insol}, "mean_r": [0.02e-6], "gstdev": [1.4], "n_tot": [60.0e6]}}}}',
             outfreq = 100, 
             out_bin= '{"liq": {"rght": 1, "moms": [0,3], "drwt": "wet", "nbin": 1, "lnli": "lin", "left": 5e-20}}',
-            outfile=outfile,
-            rd_insol = float(rd_insol))
+            outfile=outfile)
         fnc = netcdf.netcdf_file(outfile)
         plot_profiles(fnc, output_name)
         fnc.close()

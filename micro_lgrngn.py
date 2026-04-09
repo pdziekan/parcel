@@ -60,6 +60,7 @@ def _micro_step(micro, state, info, opts):
   libopts.adve = False
   libopts.sedi = False
   libopts.ice_nucl = opts["ice_nucl"]
+  libopts.depo = opts["depo"]
 
   # chemical options
   if micro.opts_init.chem_switch:
