@@ -1,6 +1,6 @@
 """
-This test runs the parcel model with lagrangian ice microphysics.
-Different rd_insol are used, corresponding to homogeneous and heretogeneoud freezing.
+This test runs the parcel model with lagrangian ice microphysics, 
+with homogeneous and heterogeneous time-dependent freezing.
 Mixing ratios of ice, liquid, and water vapor are plotted.
 """
 

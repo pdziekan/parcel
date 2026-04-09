@@ -1,8 +1,8 @@
 """
-This test runs the parcel model (with T > 0 C) using three different microphysics schemes:
-- lgrngn (Lagrangian particle-based)
-- blk_1m (bulk warm)
-- blk_1m_ice (bulk ice)
+This test runs the parcel model (warm, with T > 0 C) using three different microphysics schemes:
+- Lagrangian particle-based
+- 1-moment bulk warm
+- 1-moment bulk based on Grabowski, 1999
 
 It compares the final values of rv, th_d, and total condensed water in different schemes. 
 """

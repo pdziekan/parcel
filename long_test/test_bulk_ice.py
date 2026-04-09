@@ -1,5 +1,5 @@
 """
-This test runs the parcel model using blk_1m_ice microphysics scheme.
+This test runs the parcel model using blk_1m microphysics scheme with ice.
 It checks that the final values of ria and rc match their reference values (are consistent in each run).
 """
 

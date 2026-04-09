@@ -1,8 +1,8 @@
 """
-This test runs the parcel model with T < 0 C, using three different microphysics schemes:
-- lgrngn (Lagrangian particle-based) with singular freezing
-- lgrngn with time-dependent freezing
-- blk_1m(1-moment bulk with ice microphysics)
+This test runs the parcel model with T < 0 C, using three different ice microphysics schemes:
+- lgrngn with singular freezing (as in Shima et al., 2020)
+- lgrngn with time-dependent freezing (as in Arabas et al., 2025)
+- 1-moment bulk (Grabowski, 1999)
 
 It plots the evolution of ice, liquid and vapor mixing ratios for different schemes. 
 """
