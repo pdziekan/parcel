@@ -1,5 +1,5 @@
 """
-This test runs the parcel model using three different microphysics schemes:
+This test runs the parcel model (with T > 0 C) using three different microphysics schemes:
 - lgrngn (Lagrangian particle-based)
 - blk_1m (bulk warm)
 - blk_1m_ice (bulk ice)
@@ -14,6 +14,7 @@ sys.path.insert(0, "./")
 import numpy as np
 from parcel import parcel
 from scipy.io import netcdf
+from libcloudphxx import common
 
 def run_scheme(scheme, ice_switch, outfile):
     args = dict(
@@ -36,8 +37,7 @@ def run_scheme(scheme, ice_switch, outfile):
         if scheme.startswith("blk"):
             r_tot = np.array(f.variables['rc'][:]) + np.array(f.variables['rr'][:])
         else: 
-            moment_3 = np.array(f.variables['radius_m3'][:])
-            r_tot = moment_3 *4/3 * np.pi * 997 #multiply by density of water
+            r_tot = np.array(f.variables['radius_m3'][:]) *4/3 * np.pi * common.rho_w
     return rv, th_d, r_tot, z
 
 def test_compare_schemes():

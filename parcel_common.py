@@ -76,7 +76,7 @@ def _arguments_checking(opts, spectra, aerosol, ice_switch):
   for name, dct in aerosol.items():
     # TODO: check if name is valid netCDF identifier
     # (http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/CDM/Identifiers.html)
-    keys = ["kappa", "mean_r", "n_tot", "gstdev"]
+    keys = ["kappa", "rd_insol", "mean_r", "n_tot", "gstdev"]
     for key in keys:
       if key not in dct:
         raise Exception(">>" + key + "<< is missing in aerosol[" + name + "]")

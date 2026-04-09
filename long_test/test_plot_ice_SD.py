@@ -1,3 +1,9 @@
+"""
+This test runs the parcel model with lagrangian ice microphysics.
+Different rd_insol are used, corresponding to homogeneous and heretogeneoud freezing.
+Mixing ratios of ice, liquid, and water vapor are plotted.
+"""
+
 import sys, os, subprocess
 sys.path.insert(0, "../../")
 sys.path.insert(0, "./")
@@ -11,6 +17,7 @@ from libcloudphxx import common
 
 def plot_profiles(fnc, output_name):
     plt.clf()
+    plt.rcParams.update({'font.size': 14})
     fig, plots = plt.subplots(1, 2, figsize=(15, 5))
     plots[0].set_xlabel('mixing ratio [g/kg]')
     plots[1].set_xlabel('T [K]')
@@ -26,7 +33,7 @@ def plot_profiles(fnc, output_name):
     plots[0].plot(r_v, z)
     plots[0].plot(r_liq, z)
     plots[0].plot(r_ice, z)
-    plots[0].legend(['r_tot', 'r_v', 'r_liq', 'r_ice'], loc='best')
+    plots[0].legend(['$r_{tot}$', '$r_v$', '$r_{liq}$', '$r_{ice}$'], loc='best')
     plots[1].plot(fnc.variables["T"][:], z)
 
     if not os.path.exists("plots/outputs/"):
@@ -34,7 +41,7 @@ def plot_profiles(fnc, output_name):
     plt.savefig(os.path.join("plots/outputs/", output_name))
 
 def test_plot_ice_SD():   
-    for (rd_insol, output_name) in [("0.5e-6", "ice_SD_plot_het.png"), ("0", "ice_SD_plot_hom.png")]:
+    for (rd_insol, output_name) in [("0.5e-6", "ice_SD_plot_het.svg"), ("0", "ice_SD_plot_hom.svg")]:
         outfile = "onesim_plot.nc"
         parcel(dt=1.,w=1.,sd_conc=100,
             z_max = 5000.0,
