@@ -20,6 +20,12 @@ def rh_to_rv(RH, T, p):
     """
     return cm.eps * RH * cm.p_vs(T) / (p - RH * cm.p_vs(T))
 
+def rh_to_rh_i(RH, T):
+    """
+    convert relative humidity w.r.t liquid to that w.r.t ice 
+    """
+    return RH * cm.p_vs(T) / cm.p_vsi(T)
+
 def rhod_calc(T, p, rv):
     """
     calculate dry air density
