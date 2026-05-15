@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from scipy.io import netcdf
 import numpy as np
-import json
 from parcel_common import _Chem_g_id, _Chem_a_id
 
 

@@ -7,7 +7,7 @@ This test runs the parcel model with T < 0 C, using three different ice microphy
 It plots the evolution of ice, liquid and vapor mixing ratios for different schemes. 
 """
 
-import sys, os, subprocess
+import sys, os
 sys.path.insert(0, "../../")
 sys.path.insert(0, "./")
 import numpy as np
@@ -53,9 +53,9 @@ def test_plot_schemes():
     for (scheme, time_dep) in schemes:
         z, rv, r_liq, r_ice, T = run_scheme(scheme, time_dep, f"test_{scheme}.nc")
         if scheme == "lgrngn" and time_dep == True:
-            l = "lagranigan time-dep"
+            l = "Lagrangian time dependent"
         elif time_dep == False:
-            l = "lagranigan sigular"
+            l = "Lagrangian singular"
         else:
             l = "1-moment bulk"
         ax[0].plot(rv*1e3, z, label=l, linestyle ='--' if scheme=='blk_1m' else '-')
