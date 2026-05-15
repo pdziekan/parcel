@@ -39,6 +39,7 @@ mean_r = .04e-6
 gstdev = 2.
 n_tot  = 566.e6 * rho_stp / rho_init
 kappa  = 0.61
+rd_insol = 0.0
 
 # chem process toggling
 chem_dsl = False
@@ -66,7 +67,7 @@ out_bin = '{"plt_rw":   {"rght": 1,    "left":    0, "drwt": "wet", "lnli": "lin
                                  "CO2_a", "NH3_a", "HNO3_a"]}}'
 
 # initial aerosol distribution
-aerosol = '{"chem_aerosol": {"kappa": ' + str(kappa) + ', "mean_r": [' + str(mean_r) + '], "gstdev": [' + str(gstdev) + '], "n_tot": [' + str(n_tot) + ']}}'
+aerosol = '{"chem_aerosol": {"kappa": ' + str(kappa) + ', "rd_insol": ' + str(rd_insol) + ', "mean_r": [' + str(mean_r) + '], "gstdev": [' + str(gstdev) + '], "n_tot": [' + str(n_tot) + ']}}'
 
 # saving parcel options as a dictionary
 parcel_dict = {'dt': dt, 'z_max': z_max, 'outfreq': outfreq, 'w': w,\

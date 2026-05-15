@@ -1,8 +1,8 @@
 """
-This test runs the parcel model using three different microphysics schemes:
-- lgrngn (Lagrangian particle-based)
-- blk_1m (bulk warm)
-- blk_1m_ice (bulk ice)
+This test runs the parcel model (warm, with T > 0 C) using three different microphysics schemes:
+- Lagrangian particle-based
+- 1-moment bulk warm
+- 1-moment bulk based on Grabowski, 1999
 
 It plots the evolution of rv, th_d, and total condensed water in different schemes. 
 """
@@ -15,6 +15,7 @@ import numpy as np
 from parcel import parcel
 from scipy.io import netcdf
 import matplotlib.pyplot as plt
+from libcloudphxx import common
 
 def run_scheme(scheme, ice_switch, outfile):
     args = dict(
@@ -37,12 +38,12 @@ def run_scheme(scheme, ice_switch, outfile):
         if scheme.startswith("blk"):
             r_tot = np.array(f.variables['rc'][:]) + np.array(f.variables['rr'][:])
         else: 
-            moment_3 = np.array(f.variables['radius_m3'][:])
-            r_tot = moment_3 *4/3 * np.pi * 997 #multiply by density of water
+            r_tot =  np.array(f.variables['radius_m3'][:]) *4/3 * np.pi * common.rho_w
     return rv, th_d, r_tot, z
 
 def test_plot_schemes():
     schemes = ["lgrngn", "blk_1m", "blk_1m_ice"]
+    plt.rcParams.update({'font.size': 14})
     fig, ax = plt.subplots(1,3, figsize=(12, 6))
     for scheme in schemes:
         if scheme == "blk_1m_ice":
@@ -62,5 +63,5 @@ def test_plot_schemes():
     ax[1].legend()
     ax[2].legend()
     plt.tight_layout()
-    plt.savefig("plots/outputs/plot_schemes.svg")
+    plt.savefig("plots/outputs/plot_schemes_warm.svg")
     

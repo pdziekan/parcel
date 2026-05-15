@@ -33,8 +33,9 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
   ice_switch = False,
   ice_nucl = False,
   time_dep_ice_nucl = False,
+  depo = False,
   sd_conc = 64,
-  aerosol = '{"ammonium_sulfate": {"kappa": 0.61, "mean_r": [0.02e-6], "gstdev": [1.4], "n_tot": [60.0e6]}}',
+  aerosol = '{"ammonium_sulfate": {"kappa": 0.61, "rd_insol": 0.0, "mean_r": [0.02e-6], "gstdev": [1.4], "n_tot": [60.0e6]}}',
   out_bin = '{"radii": {"rght": 0.01, "moms": [0], "drwt": "wet", "nbin": 1, "lnli": "log", "left": 1e-15}}',
   SO2_g = 0., O3_g = 0., H2O2_g = 0., CO2_g = 0., HNO3_g = 0., NH3_g = 0.,
   chem_dsl = False, chem_dsc = False, chem_rct = False,
@@ -43,8 +44,7 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
   sstp_chem = 1,
   wait = 0,
   large_tail = False,
-  rng_seed = None,
-  rd_insol  = 0.
+  rng_seed = None
 ):
   """
   Args:
@@ -59,6 +59,7 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
     ice_switch (Optional[bool]):  enable ice microphysics
     ice_nucl (Optional[bool]):    enable ice nucleation in lagrangian scheme
     time_dep_ice_nucl (Optional[bool]): enable time-dependent ice nucleation in lagrangian scheme
+    depo (Optional[bool]): enable ice depositional growth in lagrangian scheme
     outfile (Optional[string]):   output netCDF file name
     outfreq (Optional[int]):      output interval (in number of time steps)
     pprof   (Optional[string]):   method to calculate pressure profile used to calculate
@@ -70,11 +71,12 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
 
     aerosol (Optional[json str]): dict of dicts defining aerosol distribution, e.g.:
 
-                                  {"ammonium_sulfate": {"kappa": 0.61, "mean_r": [0.02e-6, 0.07e-7], "gstdev": [1.4, 1.2], "n_tot": [120.0e6, 80.0e6]}
-                                   "gccn"            : {"kappa": 1.28, "mean_r": [2e-6],             "gstdev": [1.6],      "n_tot": [1e2]}}
+                                  {"ammonium_sulfate": {"kappa": 0.61, "rd_insol": 0.0, "mean_r": [0.02e-6, 0.07e-7], "gstdev": [1.4, 1.2], "n_tot": [120.0e6, 80.0e6]}
+                                   "gccn"            : {"kappa": 1.28, "rd_insol": 0.0, "mean_r": [2e-6],             "gstdev": [1.6],      "n_tot": [1e2]}}
 
                                   where kappa  - hygroscopicity parameter (see doi:10.5194/acp-7-1961-2007)
-                                        mean_r - lognormal distribution mean radius [m]                    (list if multimodal distribution)
+                                        rd_insol - insoluble dry radius
+                                        mean_r - lognormal distribution mean soluble dry radius [m]        (list if multimodal distribution)
                                         gstdev - lognormal distribution geometric standard deviation       (list if multimodal distribution)
                                         n_tot  - lognormal distribution total concentration under standard
                                                  conditions (T=20C, p=1013.25 hPa, rv=0) [m^-3]            (list if multimodal distribution)
@@ -91,8 +93,12 @@ def parcel(dt = .1, z_max = 200., w = 1., T_0 = 300., p_0 = 101300.,
                                   - 0-th spectrum moment for 26 bins spaced logarithmically between 0 and 1e-4 m for dry radius
                                   - 0,1,2 & 3-rd moments for 49 bins spaced linearly between .5e-6 and 25e-6 for wet radius
 
-                                  It can also define spectrum diagnostics for chemical compounds, e.g.:
+                                  Or for the ice phase:
+                                  {"ice_a": {"rght": 1e-04, "moms": [1], "drwt": "ice_a", "nbin": 49, "lnli": "lin", "left": 1e-06},
+                                   "ice_c": {"rght": 1e-04, "moms": [1], "drwt": "ice_c", "nbin": 49, "lnli": "lin", "left": 1e-06}}}
+                                  will generate spectra for ice equatorial radius (ice_a) and polar radius (ice_c)
 
+                                  It can also define spectrum diagnostics for chemical compounds, e.g.:
                                   {"chem" : {"rght": 1e-6, "left": 1e-10, "drwt": "dry", "lnli": "log", "nbin": 100, "moms": ["S_VI", "NH4_a"]}}
                                   will output the total mass of H2SO4  and NH4 ions in each sizedistribution bin
 

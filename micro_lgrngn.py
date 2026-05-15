@@ -24,7 +24,7 @@ def _micro_init(aerosol, opts, state):
     lognormals = []
     for i in range(len(dct["mean_r"])):
       lognormals.append(lognormal(dct["mean_r"][i], dct["gstdev"][i], dct["n_tot"][i]))
-    dry_distros[(dct["kappa"], opts["rd_insol"])] = sum_of_lognormals(lognormals)
+    dry_distros[(float(dct["kappa"]), float(dct["rd_insol"]))] = sum_of_lognormals(lognormals)
   opts_init.dry_distros = dry_distros
 
   # better resolution for the SD tail
@@ -60,6 +60,7 @@ def _micro_step(micro, state, info, opts):
   libopts.adve = False
   libopts.sedi = False
   libopts.ice_nucl = opts["ice_nucl"]
+  libopts.depo = opts["depo"]
 
   # chemical options
   if micro.opts_init.chem_switch:

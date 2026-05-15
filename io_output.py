@@ -17,7 +17,17 @@ def _output_bins(fout, t, micro, opts, spectra):
           fout.variables[dim+"_r_dry"][bin],
           fout.variables[dim+"_r_dry"][bin] + fout.variables[dim+"_dr_dry"][bin]
         )
-      else: raise Exception("drwt should be wet or dry")
+      elif dct["drwt"] == 'ice_a':
+        micro.diag_ice_a_rng(
+          fout.variables[dim+"_r_ice_a"][bin],
+          fout.variables[dim+"_r_ice_a"][bin] + fout.variables[dim+"_dr_ice_a"][bin]
+        )
+      elif dct["drwt"] == 'ice_c':
+        micro.diag_ice_c_rng(
+          fout.variables[dim+"_r_ice_c"][bin],
+          fout.variables[dim+"_r_ice_c"][bin] + fout.variables[dim+"_dr_ice_c"][bin]
+        )
+      else: raise Exception("drwt should be wet or dry or ice_a or ice_c")
 
       for vm in dct["moms"]:
         if type(vm) == int:
@@ -26,7 +36,11 @@ def _output_bins(fout, t, micro, opts, spectra):
             micro.diag_wet_mom(vm)
           elif dct["drwt"] == 'dry':
             micro.diag_dry_mom(vm)
-          else: raise Exception("drwt should be wet or dry")
+          elif dct["drwt"] == 'ice_a':
+            micro.diag_ice_a_mom(vm)
+          elif dct["drwt"] == 'ice_c':
+            micro.diag_ice_c_mom(vm)
+          else: raise Exception("drwt should be wet or dry or ice_a or ice_c")
           fout.variables[dim+'_m'+str(vm)][int(t), int(bin)] = np.frombuffer(micro.outbuf())
         else:
           # calculate chemistry
@@ -45,7 +59,7 @@ def _output_init(micro, opts, spectra):
     tmp = name + '_r_' + dct["drwt"]
     fout.createVariable(tmp, 'd', (name,))
     fout.variables[tmp].unit = "m"
-    fout.variables[tmp].description = "particle wet radius (left bin edge)"
+    fout.variables[tmp].description = "left bin edge"
 
     tmp = name + '_dr_' + dct["drwt"]
     fout.createVariable(tmp, 'd', (name,))

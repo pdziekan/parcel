@@ -76,7 +76,7 @@ def _arguments_checking(opts, spectra, aerosol, ice_switch):
   for name, dct in aerosol.items():
     # TODO: check if name is valid netCDF identifier
     # (http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/CDM/Identifiers.html)
-    keys = ["kappa", "mean_r", "n_tot", "gstdev"]
+    keys = ["kappa", "rd_insol", "mean_r", "n_tot", "gstdev"]
     for key in keys:
       if key not in dct:
         raise Exception(">>" + key + "<< is missing in aerosol[" + name + "]")
@@ -85,6 +85,8 @@ def _arguments_checking(opts, spectra, aerosol, ice_switch):
         raise Exception("invalid key >>" + key + "<< in aerosol[" + name + "]")
     if dct["kappa"] <= 0:
       raise Exception("kappa hygroscopicity parameter should be larger than 0 for aerosol[" + name + "]")
+    if dct["rd_insol"] < 0:
+      raise Exception("insoluble dry radius should be larger or equal to 0 for aerosol[" + name + "]")
     if type(dct["mean_r"]) != list:
         raise Exception(">>mean_r<< key in aerosol["+ name +"] must be a list")
     if type(dct["gstdev"]) != list:
@@ -122,8 +124,8 @@ def _arguments_checking(opts, spectra, aerosol, ice_switch):
         raise Exception(">>rght<< in out_bin["+ name +"] must be int or float")
     if dct["left"] >= dct["rght"]:
         raise Exception(">>left<< is greater than >>rght<< in out_bin["+ name +"]")
-    if dct["drwt"] not in ["dry", "wet"]:
-        raise Exception(">>drwt<< key in out_bin["+ name +"] must be either >>dry<< or >>wet<<")
+    if dct["drwt"] not in ["dry", "wet", "ice_a", "ice_c"]:
+        raise Exception(">>drwt<< key in out_bin["+ name +"] must be either >>dry<< or >>wet<< or >>ice_a<< or >>ice_c<<")
     if dct["lnli"] not in ["lin", "log"]:
         raise Exception(">>lnli<< key in out_bin["+ name +"] must be either >>lin<< or >>log<<")
     if type(dct["nbin"]) != int:
