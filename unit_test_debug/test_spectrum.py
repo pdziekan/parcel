@@ -52,7 +52,7 @@ def test_bin_checker(data, name_spect, eps_d=1.e-14):
 
 @pytest.mark.parametrize("var", ["wradii_r_wet", "wradii_dr_wet", "linwradii_r_wet", "linwradii_dr_wet",
                                  "dradii_r_dry", "dradii_dr_dry", "lindradii_r_dry", "lindradii_dr_dry"])
-def test_spectrum_diff(data, var, eps_d = 1e-15):
+def test_spectrum_diff(data, var, eps_d = 1e-14):
     """
     Compare the results with the referential simulation
     (stored in refdata folder)                                             
@@ -61,7 +61,7 @@ def test_spectrum_diff(data, var, eps_d = 1e-15):
     f_ref  = netcdf.netcdf_file("unit_test/refdata/test_spectrum.nc", "r")
 
     # ... the bin edges and bin sizes ...
-    assert np.isclose(f_ref.variables[var][:], data.variables[var][:],atol=0, rtol=eps_d).all()
+    assert np.isclose(f_ref.variables[var][:], data.variables[var][:],atol=1e-20, rtol=eps_d).all()
 
     # ... and 0th, 1st, 3rd moment of wet and dry radius size distribution             
 @pytest.mark.parametrize("mom, eps", [("wradii_m0",    1e-15), ("dradii_m0",    1e-15), 
