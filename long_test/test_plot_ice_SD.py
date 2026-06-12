@@ -20,11 +20,12 @@ def plot_profiles(fnc, output_name):
     plt.rcParams.update({'font.size': 14})
     fig, plots = plt.subplots(1, 2, figsize=(15, 5))
     plots[0].set_xlabel('mixing ratio [g/kg]')
-    plots[1].set_xlabel('T [K]')
+    plots[1].set_xlabel('T [C]')
     for ax in plots:
-        ax.set_ylabel('z [m]')
+        ax.set_ylabel('z [km]')
+        ax.grid()
 
-    z = fnc.variables["z"][:]
+    z = fnc.variables["z"][:] / 1000 #km
     r_v = fnc.variables["r_v"][:] * 1000  #g/kg
     r_liq = np.array([i[0] for i in fnc.variables['liq_m3'][:]]) *4/3 * np.pi * common.rho_w * 1000 #g/kg
     r_ice = fnc.variables["ice_mix_ratio"][:] * 1000 #g/kg
@@ -34,7 +35,8 @@ def plot_profiles(fnc, output_name):
     plots[0].plot(r_liq, z)
     plots[0].plot(r_ice, z)
     plots[0].legend(['$r_{tot}$', '$r_v$', '$r_{liq}$', '$r_{ice}$'], loc='best')
-    plots[1].plot(fnc.variables["T"][:], z)
+    plots[1].plot(fnc.variables["T"][:] - 273.15, z)
+    plt.suptitle("Homogeneous ice nucleation" if output_name == "ice_SD_plot_hom.svg" else "Heterogeneous ice nucleation")
 
     if not os.path.exists("plots/outputs/"):
         subprocess.call(["mkdir", "plots/outputs/"])
