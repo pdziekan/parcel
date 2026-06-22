@@ -76,7 +76,7 @@ def _arguments_checking(opts, spectra, aerosol, ice_switch):
   for name, dct in aerosol.items():
     # TODO: check if name is valid netCDF identifier
     # (http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/CDM/Identifiers.html)
-    keys = ["kappa", "rd_insol", "mean_r", "n_tot", "gstdev"]
+    keys = ["kappa", "sol_frac", "mean_r", "n_tot", "gstdev"]
     for key in keys:
       if key not in dct:
         raise Exception(">>" + key + "<< is missing in aerosol[" + name + "]")
@@ -85,8 +85,8 @@ def _arguments_checking(opts, spectra, aerosol, ice_switch):
         raise Exception("invalid key >>" + key + "<< in aerosol[" + name + "]")
     if dct["kappa"] <= 0:
       raise Exception("kappa hygroscopicity parameter should be larger than 0 for aerosol[" + name + "]")
-    if dct["rd_insol"] < 0:
-      raise Exception("insoluble dry radius should be larger or equal to 0 for aerosol[" + name + "]")
+    if dct["sol_frac"] < 0 or dct["sol_frac"] > 1:
+      raise Exception("soluble fraction should be between 0 and 1 for aerosol[" + name + "]")
     if type(dct["mean_r"]) != list:
         raise Exception(">>mean_r<< key in aerosol["+ name +"] must be a list")
     if type(dct["gstdev"]) != list:

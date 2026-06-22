@@ -55,7 +55,7 @@ def data(request):
           outfile = outfile,\
           chem_dsl = True, chem_dsc = True, chem_rct = False,\
           aerosol = \
-            '{"test": {"kappa": 0.5, "rd_insol":0.0, "mean_r": [' + str(mean_r) + '], "gstdev": [' + str(gstdev) + '], "n_tot": [' + str(n_tot) + ']}}',\
+            '{"test": {"kappa": 0.5, "sol_frac":1.0, "mean_r": [' + str(mean_r) + '], "gstdev": [' + str(gstdev) + '], "n_tot": [' + str(n_tot) + ']}}',\
           sd_conc = sd_conc,\
           out_bin = \
             '{"radii": {"rght": 1.0, "left": 0.0, "drwt": "wet", "lnli": "lin", "nbin": 1, "moms": [0, 3]},\

@@ -27,7 +27,7 @@ def test_ice_SD():
                      depo = True,
                      ice_nucl = True,
                      time_dep_ice_nucl = time_dep,
-                     aerosol = '{"ammonium_sulfate": {"kappa": 0.61, "rd_insol": 0.5e-6, "mean_r": [0.02e-6], "gstdev": [1.4], "n_tot": [60.0e6]}}',
+                     aerosol = '{"ammonium_sulfate": {"kappa": 0.61, "sol_frac": 0.1, "mean_r": [0.02e-6], "gstdev": [1.4], "n_tot": [60.0e6]}}',
                      outfreq = 4000, 
                      out_bin = '{"liq": {"rght": 1, "moms": [0,3], "drwt": "wet", "nbin": 1, "lnli": "lin", "left": 5e-20}}',
                      outfile = outfile,
