@@ -24,7 +24,7 @@ def _micro_init(aerosol, opts, state):
     lognormals = []
     for i in range(len(dct["mean_r"])):
       lognormals.append(lognormal(dct["mean_r"][i], dct["gstdev"][i], dct["n_tot"][i]))
-    dry_distros[(float(dct["kappa"]), float(dct["rd_insol"]))] = sum_of_lognormals(lognormals)
+    dry_distros[(float(dct["kappa"]), float(dct["sol_frac"]))] = sum_of_lognormals(lognormals)
   opts_init.dry_distros = dry_distros
 
   # better resolution for the SD tail
