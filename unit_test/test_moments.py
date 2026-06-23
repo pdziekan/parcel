@@ -32,7 +32,7 @@ def data(request):
     p_dict['wait']     = 0
 
     # initial aerosol: 1-mode ammonium sulfate lognormal
-    p_dict['aerosol'] = '{"ammonium_sulfate": {"kappa":  0.61, "rd_insol":0.0, "mean_r": [0.02e-6], "gstdev": [1.4], "n_tot":  [100e6]}}'
+    p_dict['aerosol'] = '{"ammonium_sulfate": {"kappa":  0.61, "sol_frac":1.0, "mean_r": [0.02e-6], "gstdev": [1.4], "n_tot":  [100e6]}}'
 
     # output for size distribution moments
     p_dict['out_bin'] = '{\
