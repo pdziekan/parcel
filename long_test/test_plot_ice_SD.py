@@ -17,7 +17,7 @@ from libcloudphxx import common
 
 def plot_profiles(fnc, output_name):
     plt.clf()
-    plt.rcParams.update({'font.size': 14})
+    plt.rcParams.update({'font.size': 13})
     fig, plots = plt.subplots(1, 2, figsize=(15, 5))
     plots[0].set_xlabel('mixing ratio [g/kg]')
     plots[1].set_xlabel('T [C]')
@@ -34,7 +34,7 @@ def plot_profiles(fnc, output_name):
     plots[0].plot(r_v, z)
     plots[0].plot(r_liq, z)
     plots[0].plot(r_ice, z)
-    plots[0].legend(['$r_{tot}$', '$r_v$', '$r_{liq}$', '$r_{ice}$'], loc='best')
+    plots[0].legend(['total', 'water vapor', 'liquid', 'ice'], loc='best', fontsize=12)
     plots[1].plot(fnc.variables["T"][:] - 273.15, z)
     plt.suptitle("Homogeneous ice nucleation" if output_name == "ice_SD_plot_hom.svg" else "Heterogeneous ice nucleation")
 
@@ -43,11 +43,11 @@ def plot_profiles(fnc, output_name):
     plt.savefig(os.path.join("plots/outputs/", output_name))
 
 def test_plot_ice_SD():   
-    for (mean_r, sol_frac, output_name) in [("0.5e-6", "6.4e-5", "ice_SD_plot_het.svg"), ("0.02e-6", "1.0", "ice_SD_plot_hom.svg")]:
+    for (mean_r, sol_frac, output_name) in [("0.5e-6", "6.4e-5", "ice_SD_plot_het.pdf"), ("0.02e-6", "1.0", "ice_SD_plot_hom.pdf")]:
         outfile = "onesim_plot.nc"
         parcel(dt=1.,w=1.,sd_conc=100,
             z_max = 5000.0,
-            T_0 = 263.0,
+            T_0 = 265.0,
             RH_0 = 1.,
             scheme = "lgrngn",
             ice_switch=True,
