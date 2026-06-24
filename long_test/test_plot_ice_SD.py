@@ -36,7 +36,7 @@ def plot_profiles(fnc, output_name):
     plots[0].plot(r_ice, z)
     plots[0].legend(['total', 'water vapor', 'liquid', 'ice'], loc='best', fontsize=12)
     plots[1].plot(fnc.variables["T"][:] - 273.15, z)
-    plt.suptitle("Homogeneous ice nucleation" if output_name == "ice_SD_plot_hom.svg" else "Heterogeneous ice nucleation")
+    plt.suptitle("Homogeneous ice nucleation" if output_name.startswith("ice_SD_plot_hom") else "Heterogeneous ice nucleation")
 
     if not os.path.exists("plots/outputs/"):
         subprocess.call(["mkdir", "plots/outputs/"])
