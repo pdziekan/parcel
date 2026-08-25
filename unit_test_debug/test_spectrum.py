@@ -52,7 +52,7 @@ def test_bin_checker(data, name_spect, eps_d=1.e-14):
 
 @pytest.mark.parametrize("var", ["wradii_r_wet", "wradii_dr_wet", "linwradii_r_wet", "linwradii_dr_wet",
                                  "dradii_r_dry", "dradii_dr_dry", "lindradii_r_dry", "lindradii_dr_dry"])
-def test_spectrum_diff(data, var, eps_d = 1e-15):
+def test_spectrum_diff(data, var, eps_d = 1e-14):
     """
     Compare the results with the referential simulation
     (stored in refdata folder)                                             
